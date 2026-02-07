@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 本项目使用 [ECDICT](https://github.com/skywind3000/ECDICT) 作为词典数据源。
 
-1. 下载 `ecdict.csv` 文件（约 60MB）
+1. 下载 `ecdict.csv` 文件（约 100MB）
 2. 将文件放到项目根目录
 3. 构建 SQLite 数据库：
 
