@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习数据统计 - ArXiv Reader</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stats.css') }}">
+</head>
+<body>
+    <div class="stats-container">
+        <header>
+            <div class="header-left">
+                <h1>📊 英语学习数据统计</h1>
+                <p class="subtitle">追踪你的学习进度，持续进步</p>
+            </div>
+            <nav>
+                <a href="http://localhost:8603" class="btn btn-primary">📖 返回阅读器</a>
+            </nav>
+        </header>
+
+        <!-- 概览卡片 -->
+        <div class="cards-row">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <h3>总词汇量</h3>
+                <div class="number" id="total-vocab">-</div>
+                <div class="trend">累计查询的不同单词</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <h3>已掌握词汇</h3>
+                <div class="number" id="mastered-words">-</div>
+                <div class="trend">标记为熟悉的单词</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔍</div>
+                <h3>今日查询</h3>
+                <div class="number" id="today-queries">-</div>
+                <div class="trend">单词查询次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <h3>阅读论文数</h3>
+                <div class="number" id="papers-read">-</div>
+                <div class="trend">今日完成阅读</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <h3>阅读时长</h3>
+                <div class="number" id="reading-time">-</div>
+                <div class="trend">今日阅读时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔄</div>
+                <h3>重复查询率</h3>
+                <div class="number" id="repeat-rate">-</div>
+                <div class="trend">需要加强记忆</div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="charts-grid">
+            <div class="chart-container large">
+                <h3>📈 词汇学习曲线（30天）</h3>
+                <canvas id="learningCurve"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>🎯 分类学习分布</h3>
+                <canvas id="categoryDist"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>📊 掌握度分布</h3>
+                <canvas id="masteryChart"></canvas>
+            </div>
+
+            <div class="chart-container large">
+                <h3>📅 每日学习活动</h3>
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 单词分析 -->
+        <div class="analysis-section">
+            <h3>🔥 高频查询单词</h3>
+            <div id="wordCloud" class="word-cloud"></div>
+        </div>
+
+        <div class="analysis-section">
+            <h3>⚡ 难词分析（多次查询仍未掌握）</h3>
+            <div id="difficult-words" class="word-list"></div>
+        </div>
+
+        <!-- 复习建议 -->
+        <div class="review-section">
+            <h3>🔄 今日复习建议（基于艾宾浩斯遗忘曲线）</h3>
+            <div id="review-list" class="review-list"></div>
+        </div>
+
+        <!-- 阅读进度 -->
+        <div class="progress-section">
+            <h3>📈 阅读进度统计</h3>
+            <div class="progress-stats" id="progress-stats">
+                <div class="progress-item">
+                    <span class="label">累计阅读论文</span>
+                    <span class="value" id="total-papers">-</span>
+                </div>
+                <div class="progress-item">
+                    <span class="label">累计阅读时长</span>
+                    <span class="value" id="total-hours">-</span>
+                </div>
+                <div class="progress-item">
+                    <span class="label">平均每次阅读</span>
+                    <span class="value" id="avg-session">-</span>
+                </div>
+                <div class="progress-item">
+                    <span class="label">累计阅读页数</span>
+                    <span class="value" id="total-pages">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据管理 -->
+        <div class="data-management">
+            <h3>⚙️ 数据管理</h3>
+            <div class="management-buttons">
+                <button class="btn btn-danger" onclick="confirmResetData()">
+                    🗑️ 重置学习数据
+                </button>
+                <button class="btn btn-secondary" onclick="showImportModal()">
+                    📥 导入熟词
+                </button>
+                <button class="btn btn-secondary" onclick="showVocabularyModal()">
+                    📚 查看词库
+                </button>
+                <button class="btn btn-secondary" onclick="showImportHistoryModal()">
+                    📝 导入历史
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    📤 导出数据
+                </button>
+            </div>
+            <p class="hint">重置数据将清除所有学习记录，但不会删除已下载的PDF文件（除非选择完全重置）</p>
+        </div>
+
+        <!-- 详细查询 -->
+        <div class="query-section">
+            <h3>🔍 高级查询</h3>
+            <div class="query-controls">
+                <select id="query-type">
+                    <option value="word_frequency">高频单词统计</option>
+                    <option value="learning_curve">学习曲线</option>
+                    <option value="category_stats">分类统计</option>
+                    <option value="mastery_distribution">掌握度分布</option>
+                    <option value="review_suggestions">复习建议</option>
+                    <option value="word_history">单词历史</option>
+                    <option value="reading_progress">阅读进度</option>
+                    <option value="vocabulary_growth">词汇增长</option>
+                    <option value="difficult_words">难词分析</option>
+                </select>
+                <input type="text" id="query-param" placeholder="参数（如天数、单词等）">
+                <button onclick="executeQuery()" class="btn btn-primary">查询</button>
+            </div>
+            <pre id="query-result"></pre>
+        </div>
+    </div>
+
+    <!-- 重置数据确认对话框 -->
+    <div class="modal-overlay" id="reset-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚠️ 确认重置数据</h3>
+                <button class="modal-close" onclick="closeResetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>请选择重置类型：</p>
+                <label class="radio-label">
+                    <input type="radio" name="reset-type" value="soft" checked>
+                    <span class="radio-text">
+                        <strong>仅重置学习记录</strong>
+                        <small>保留论文元数据和PDF文件，仅清除查询记录、掌握度等学习数据</small>
+                    </span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="reset-type" value="hard">
+                    <span class="radio-text">
+                        <strong>完全重置（包含PDF）</strong>
+                        <small>清除所有数据并删除所有下载的PDF文件，相当于重新开始</small>
+                    </span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResetModal()">取消</button>
+                <button class="btn btn-danger" onclick="executeReset()">确认重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入熟词对话框 -->
+    <div class="modal-overlay" id="import-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📥 导入熟词</h3>
+                <button class="modal-close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>粘贴包含英文单词的文本，系统将自动提取并标记为熟词：</p>
+                <textarea id="import-text" placeholder="在此粘贴文本..."></textarea>
+                <div class="import-options">
+                    <label>
+                        <input type="checkbox" id="import-from-file" onchange="toggleFileUpload()">
+                        或上传文本文件
+                    </label>
+                    <input type="file" id="import-file" accept=".txt,.md,.csv" style="display:none" onchange="handleFileUpload(this)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">取消</button>
+                <button class="btn btn-primary" onclick="executeImport()">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看词库对话框 -->
+    <div class="modal-overlay" id="vocabulary-modal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>📚 熟词词库</h3>
+                <button class="modal-close" onclick="closeVocabularyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="vocabulary-search">
+                    <input type="text" id="vocab-search" placeholder="搜索单词..." oninput="searchVocabulary()">
+                    <span id="vocab-count">共 0 个单词</span>
+                </div>
+                <div class="vocabulary-list" id="vocabulary-list">
+                    <p class="loading-text">加载中...</p>
+                </div>
+                <div class="vocabulary-pagination" id="vocab-pagination">
+                    <button class="btn btn-sm" onclick="changeVocabPage(-1)">上一页</button>
+                    <span id="vocab-page-info">第 1 页</span>
+                    <button class="btn btn-sm" onclick="changeVocabPage(1)">下一页</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeVocabularyModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入历史对话框 -->
+    <div class="modal-overlay" id="import-history-modal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>📝 导入历史</h3>
+                <button class="modal-close" onclick="closeImportHistoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="hint">点击批次右侧的"撤销"按钮可撤销该次导入（将该批次的单词从熟词中移除）</p>
+                <div class="import-history-list" id="import-history-list">
+                    <p class="loading-text">加载中...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportHistoryModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+
+    <!-- 页脚 -->
+    <footer style="background: var(--bg-secondary); border-top: 2px solid var(--border-color); padding: 20px; margin-top: 30px; text-align: center; font-size: 13px; color: var(--text-secondary);">
+        <div style="margin-bottom: 10px;">
+            <span>Made with ❤️ by <a href="https://github.com/raditree" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500;">raditree</a></span>
+        </div>
+        <div>
+            <a href="https://github.com/raditree/paper_reading_while_English_learning" target="_blank" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">📁 项目主页</a>
+            <span style="color: var(--border-color);">|</span>
+            <a href="https://github.com/raditree/paper_reading_while_English_learning/issues" target="_blank" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">🐛 提交 Issue</a>
+            <span style="color: var(--border-color);">|</span>
+            <span style="margin: 0 10px;">v1.1.0</span>
+        </div>
+    </footer>
+</body>
+</html>

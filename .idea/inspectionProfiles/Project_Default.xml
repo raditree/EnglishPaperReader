@@ -1,0 +1,27 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ignoredPackages">
+        <list>
+          <option value="sentence-transformers" />
+          <option value="faiss-cpu" />
+          <option value="langchain" />
+          <option value="numpy" />
+          <option value="pandas" />
+          <option value="streamlit" />
+          <option value="python-dotenv" />
+          <option value="tqdm" />
+          <option value="PyPDF2" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="types.NoneType.eos_token" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
