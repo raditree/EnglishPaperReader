@@ -73,7 +73,7 @@ pip install -r requirements.txt
 下载 ECDICT 词典文件 `ecdict.csv` 放到项目根目录，然后构建数据库：
 
 ```bash
-# 下载词典（约 30MB）
+# 下载词典（约 60MB）
 # 地址：https://github.com/skywind3000/ECDICT/releases
 
 # 构建数据库
