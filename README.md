@@ -1,6 +1,6 @@
 # 📚 Paper Reading While English Learning
 
-> **版本**: v1.1.0  
+> **版本**: v1.0.0  
 > **作者**: [raditree](https://github.com/raditree)  
 > **开源协议**: [MIT License](./LICENSE)
 
@@ -73,8 +73,9 @@ pip install -r requirements.txt
 下载 ECDICT 词典文件 `ecdict.csv` 放到项目根目录，然后构建数据库：
 
 ```bash
-# 下载词典（约 60MB）
+# 下载词典（约 100MB）
 # 地址：https://github.com/skywind3000/ECDICT/releases
+# 或者精简版(20M以内)：https://gitcode.com/open-source-toolkit/a2da0
 
 # 构建数据库
 python -c "from paper_reader.translate import ECDict; ECDict().build_db()"
