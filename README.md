@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 3. **准备词典文件**
 
-下载 ECDICT 词典文件 `ecdict.csv` 放到项目根目录，然后构建数据库：
+下载 ECDICT 词典文件 `ecdict.csv` 放到目录/paper_reader下，然后构建数据库：
 
 ```bash
 # 下载词典（约 100MB）
